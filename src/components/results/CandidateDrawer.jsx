@@ -1,4 +1,4 @@
-import { X, CheckCircle, XCircle } from 'lucide-react'
+import { X, CheckCircle, XCircle, Mail, Phone, FileText } from 'lucide-react'
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts'
 import RecommendationBadge from './RecommendationBadge'
 import ScoreBar from './ScoreBar'
@@ -7,7 +7,9 @@ import { getScoreColor } from '../../utils/helpers'
 export default function CandidateDrawer({ candidate, onClose, onAddCompare }) {
   if (!candidate) return null
 
-  const { fileName, scores, strengths, gaps, recommendation, topSkills, explanation } = candidate
+  const { fileName, candidateName, candidateEmail, candidatePhone, scores, strengths, gaps, recommendation, topSkills, explanation } = candidate
+
+  const displayName = candidateName && candidateName.trim() ? candidateName.trim() : null
 
   const radarData = [
     { subject: 'Technical', value: scores.technicalSkills },
@@ -26,17 +28,47 @@ export default function CandidateDrawer({ candidate, onClose, onAddCompare }) {
 
   return (
     <>
-      {/* Backdrop */}
       <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} />
 
-      {/* Drawer */}
       <div className="fixed top-0 right-0 h-full w-full md:w-2/5 bg-white z-50 shadow-md overflow-y-auto">
         <div className="p-6 space-y-6">
           {/* Header */}
           <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-base font-semibold text-gray-900 break-all">{fileName}</h2>
-              <div className="flex items-center gap-3 mt-2">
+            <div className="flex-1 pr-4">
+              {/* Name or filename */}
+              {displayName ? (
+                <h2 className="text-lg font-bold text-gray-900">{displayName}</h2>
+              ) : (
+                <h2 className="text-base font-semibold text-gray-900 break-all">{fileName}</h2>
+              )}
+
+              {/* Contact info */}
+              <div className="flex flex-col gap-1 mt-1.5">
+                {displayName && (
+                  <span className="flex items-center gap-1.5 text-xs text-gray-400">
+                    <FileText size={11} /> {fileName}
+                  </span>
+                )}
+                {candidateEmail && (
+                  <a
+                    href={`mailto:${candidateEmail}`}
+                    className="flex items-center gap-1.5 text-xs text-green-600 hover:underline"
+                  >
+                    <Mail size={11} /> {candidateEmail}
+                  </a>
+                )}
+                {candidatePhone && (
+                  <a
+                    href={`tel:${candidatePhone}`}
+                    className="flex items-center gap-1.5 text-xs text-gray-500 hover:underline"
+                  >
+                    <Phone size={11} /> {candidatePhone}
+                  </a>
+                )}
+              </div>
+
+              {/* Score + badge */}
+              <div className="flex items-center gap-3 mt-3">
                 <span className={`text-3xl font-bold ${getScoreColor(scores.final)}`}>{scores.final}</span>
                 <RecommendationBadge recommendation={recommendation} />
               </div>
@@ -90,8 +122,7 @@ export default function CandidateDrawer({ candidate, onClose, onAddCompare }) {
             <ul className="space-y-2">
               {strengths?.map((s, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                  <CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
-                  {s}
+                  <CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" />{s}
                 </li>
               ))}
             </ul>
@@ -103,8 +134,7 @@ export default function CandidateDrawer({ candidate, onClose, onAddCompare }) {
             <ul className="space-y-2">
               {gaps?.map((g, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                  <XCircle size={16} className="text-red-400 mt-0.5 flex-shrink-0" />
-                  {g}
+                  <XCircle size={16} className="text-red-400 mt-0.5 flex-shrink-0" />{g}
                 </li>
               ))}
             </ul>
@@ -116,13 +146,23 @@ export default function CandidateDrawer({ candidate, onClose, onAddCompare }) {
             <p className="text-sm text-gray-600 italic bg-gray-100 rounded-lg p-4">{explanation}</p>
           </div>
 
-          {/* Compare button */}
-          <button
-            onClick={() => { onAddCompare(candidate); onClose() }}
-            className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 py-2 rounded-lg font-medium transition-colors duration-200 text-sm"
-          >
-            Add to Compare
-          </button>
+          {/* Actions */}
+          <div className="flex gap-2">
+            {candidateEmail && (
+              <a
+                href={`mailto:${candidateEmail}`}
+                className="flex-1 flex items-center justify-center gap-1.5 text-xs bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium transition-colors duration-200"
+              >
+                <Mail size={13} /> Email Candidate
+              </a>
+            )}
+            <button
+              onClick={() => { onAddCompare(candidate); onClose() }}
+              className="flex-1 border border-gray-200 hover:bg-gray-50 text-gray-700 py-2 rounded-lg font-medium transition-colors duration-200 text-sm"
+            >
+              Add to Compare
+            </button>
+          </div>
         </div>
       </div>
     </>
